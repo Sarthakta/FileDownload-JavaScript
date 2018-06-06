@@ -1,0 +1,51 @@
+<html>
+<head>
+<head>
+	<script type="text/javascript" src="./lib/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="./lib/angular.js"></script>
+    <script type="text/javascript" src="./lib/kendo.custom.min.js"></script>
+
+<script>
+	function toBinaryString(data) {
+		var ret = [];
+		var len = data.length;
+		var byte;
+		for (var i = 0; i < len; i++) { 
+			byte=( data.charCodeAt(i) & 0xFF )>>> 0;
+			ret.push( String.fromCharCode(byte) );
+		}
+	   return ret.join('');
+	}
+
+	function downloadFile(){
+		  var xhr; 
+		  if (window.XMLHttpRequest) {
+			xhr =  new XMLHttpRequest();
+		  } else {
+			try { xhr =  new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
+			try { xhr = new ActiveXObject('Msxml2.XMLHTTP.6.0'); } catch(e) {}
+			try { xhr = new ActiveXObject('Msxml2.XMLHTTP.3.0'); } catch(e) {}
+			try { xhr = new ActiveXObject('Msxml2.XMLHTTP'); } catch(e) {}
+		  }
+
+		xhr.open( "GET", 'https://ip:port/context' );     
+		xhr.addEventListener( "load", function(){
+		var data = toBinaryString(this.responseText);
+		var matchedFileNameArray = this.getResponseHeader("Content-Disposition").match(/filename=['"](.*)['"]$/);
+		data = "data:application/octet-stream;base64,"+btoa(data);
+		//document.location = data;
+		kendo.saveAs({
+							dataURI: data,
+							fileName: matchedFileNameArray[1]
+						});
+		}, false);
+		xhr.setRequestHeader('Authorization', 'Bearer your auth token');
+		xhr.overrideMimeType( "application/octet-stream; charset=x-user-defined;");
+		xhr.send(null);
+	}
+</script>
+</head>
+<body>
+ <a href="javascript:downloadFile()">File Link</a> 
+</body>
+</html>
